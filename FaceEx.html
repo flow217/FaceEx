@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <style>
+        body {
+            background-color: #888888;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .left-column,
+        .middle-column,
+        .right-column {
+            padding: 20px;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .left-column {
+            min-width: 300px;
+            padding: 20px;
+            display: inline;
+        }
+
+        .divider {
+            cursor: ew-resize;
+            background-color: #ccc;
+            width: 5px;
+            height: 100%;
+            user-select: none;
+        }
+
+        .middle-column {
+            min-width: 600px;
+
+            flex-grow: 1;
+            /* Allows the middle column to grow */
+        }
+
+        .canvas-container {
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+        }
+
+        .right-column {
+            min-width: 160px;
+        }
+
+        button {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        #imageContainer {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .label.button {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+
+        .label.button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .right-column {
+            max-width: 25vw;
+        }
+    </style>
+
+    <div class="container">
+        <div class="left-column">
+            <br>
+            <button id="resetAUButton">Reset AUs</button>
+            <br>
+            <div class="sliders-container"></div>
+        </div>
+        <div class="divider" id="dividerLeft"></div>
+        <div class="middle-column">
+            <div class="canvas-container"></div>
+        </div>
+        <div class="divider" id="dividerRight"></div>
+        <div class="right-column">
+            <br>
+            <br>
+            <button id="saveButton">Save Animations</button>
+            <br>
+            <button id="loadButton">Load Animations</button>
+            <input type="file" id="fileInput" style="display: none;" accept=".json">
+            <br>
+            <br>
+            <button id="createAnimationButton">Create Animation</button>
+            <button id="playAnimationButton">Play Animation</button>
+            <label for="durationInput">Duration (millisec):</label>
+            <input type="number" id="durationInput" name="duration" min="0" step="any" value="500">
+            <button id="captureButton">Capture Frame</button>
+            <button id="resetAUAnimations">Reset AU Animations</button>
+            <button id="stopAnimations">Stop Animation</button>
+            <button id="resetFace">Reset Face</button>
+            <label for="repeatCheckbox">Repeat</label>
+            <input type="checkbox" id="repeatCheckbox" name="repeatCheckbox">
+            <br>
+            <label for="captureCheckbox">Capture Animation:</label>
+            <input type="checkbox" id="captureCheckbox" name="capture">
+            <div id="imageContainer" style="width: 100%;"></div>
+            <hr>
+            <img id="largeImage" src="" style="width: 90%; display: block; margin: 20px auto;" />
+
+        </div>
+    </div>
+
+</head>
+
+<body>
+
+
+    <script type="importmap">
+			{
+				"imports": {
+					"three": "./three.js/build/three.module.js",
+					"three/addons/": "./three.js/examples/jsm/"
+				}
+			}
+		</script>
+
+    <script type="module">
+
+        import * as THREE from 'three';
+
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
+        import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+
+        import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+
+
+
+        ////////////////////////
+        // Initial Boilerplate
+        //////////////////////
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 0.4; // Increase to brighten the scene
+
+        const canvasContainer = document.querySelector('.canvas-container');
+        canvasContainer.appendChild(renderer.domElement);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 100);
+        camera.position.z = 5;
+
+        const scene = new THREE.Scene();
+        scene.scale.x = 1;
+
+        const environment = new RoomEnvironment(renderer);
+        const pmremGenerator = new THREE.PMREMGenerator(renderer);
+
+        const backgroundColor = { color: '#000000' };
+        scene.background = backgroundColor;
+        scene.environment = pmremGenerator.fromScene(environment).texture;
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+
+
+        function createAUSliders(auConfig, strengths) {
+            const container = document.querySelector('.sliders-container');
+            container.innerHTML = ''; // Clear existing content
+
+            Object.keys(auConfig).forEach((au) => {
+                const sliderContainer = document.createElement('div');
+                sliderContainer.className = 'slider-container';
+
+                const label = document.createElement('label');
+                label.textContent = `${au}: `;
+                label.className = 'slider-label';
+
+                const slider = document.createElement('input');
+                slider.setAttribute('type', 'range');
+                slider.setAttribute('min', '0');
+                slider.setAttribute('max', '5');
+                slider.setAttribute('value', '0'); // Default value
+                slider.className = 'slider';
+                slider.dataset.action = au; // Link slider to action unit
+
+                const strengthDisplay = document.createElement('span');
+                strengthDisplay.textContent = Object.keys(strengths)[0]; // Default to 'C'
+
+                slider.oninput = function () {
+                    const index = parseInt(this.value, 10) - 1;
+                    const strengthKeys = Object.keys(strengths);
+                    strengthDisplay.textContent = strengthKeys[index];
+                };
+
+                sliderContainer.appendChild(label);
+                sliderContainer.appendChild(slider);
+                sliderContainer.appendChild(strengthDisplay);
+                container.appendChild(sliderContainer);
+            });
+
+            // Set up logging after sliders have been created
+            setupSliderValueLogging();
+        }
+
+        function setupSliderValueLogging() {
+            const sliders = document.querySelectorAll('.sliders-container .slider');
+            sliders.forEach(slider => {
+                slider.addEventListener('input', (e) => {
+                    const action = e.target.dataset.action; // Assuming each slider has a data-action attribute
+                    const value = parseFloat(e.target.value); // Convert the value to a float
+                    handleSliderChange(action, value); // Call the logic function with the action and current value
+                });
+            });
+        }
+
+        ////////////////////////////////////////
+        //Load Model , decompress and Textures 
+        //////////////////////////////////////
+
+        async function loadModel() {
+            return new Promise((resolve, reject) => {
+                const ktx2Loader = new KTX2Loader()
+                    .setTranscoderPath('./three.js/examples/jsm/libs/basis/')
+                    .detectSupport(renderer);
+
+                new GLTFLoader()
+                    .setKTX2Loader(ktx2Loader)
+                    .setMeshoptDecoder(MeshoptDecoder)
+                    .load('./facecap.glb', function (gltf) {
+                        const mesh = gltf.scene.children[0];
+                        scene.add(mesh);
+                        resolve(gltf);
+                    }, undefined, function (error) {
+                        reject(error);
+                    });
+            });
+
+        }
+
+        ////////////////////////
+        // Wait until model load	
+        //////////////////////	
+
+        await loadModel();
+
+        /////////////////////
+        // VARIABLE STUFF //
+        ///////////////////
+
+        const head = scene.getObjectByName('mesh_2');
+        const initialInfluences = head.morphTargetInfluences;
+        const clock = new THREE.Clock();
+        const meshName = 'mesh_2';
+        // global animation clip all functions should use this
+        let animationClip;
+        // global mixer
+        let mixer = new THREE.AnimationMixer(head);
+        const gui = createGUIForModel(head);
+
+
+
+        // global container to hold the current, and only animation
+        let animations = [
+            // Structure of an animations file
+            // {
+            //     "name": "animationName1",
+            //     "Transitions": [
+            //         {
+            //             "Thumbnail": "screenshotBase64_1",
+            //             "startframe": [/* array of start frame influences */],
+            //             "endframe": [/* array of end frame influences */],
+            //             "duration": 1.0
+            //         },
+            //         {
+            //             "Thumbnail": "screenshotBase64_2",
+            //             "startframe": [/* array of start frame influences */],
+            //             "endframe": [/* array of end frame influences */],
+            //             "duration": 1.5
+            //         },
+            //         // More transitions can be added here.
+            //     ]
+            // },
+            // // More animation objects can be added here.
+        ];
+
+        // should be adjustable from a config file
+        const strengthsDefault = {
+            "A": 0.2,
+            "B": 0.4,
+            "C": 0.6,
+            "D": 0.8,
+            "F": 1.0,
+        }
+        
+        const auConfigDefault = {
+            "AU1": ["browInnerUp"],
+            "AU2": ["browOuterUp_L", "browOuterUp_R"],
+            "AU4": ["browDown_L", "browDown_R"],
+            "AU5": ["eyeWide_L", "eyeWide_R"],
+            "AU6": ["cheekSquint_L", "cheekSquint_R"],
+            "AU7": ["eyeSquint_L", "eyeSquint_R"],
+            "AU9": ["noseSneer_L", "noseSneer_R"],
+            "AU10": ["mouthUpperUp_L", "mouthUpperUp_R"],
+            "AU12": ["mouthSmile_L", "mouthSmile_R"],
+            "AU14": ["mouthDimple_L", "mouthDimple_R"],
+            "AU15": ["mouthFrown_L", "mouthFrown_R"],
+            "AU16": ["mouthLowerDown_L", "mouthLowerDown_R"],
+            "AU17": ["mouthShrugUpper", "mouthShrugLower"],
+            "AU18": ["mouthPucker"],
+            "AU20": ["mouthStretch_L", "mouthStretch_R"],
+            "AU22": ["mouthFunnel"],
+            "AU24": ["mouthPress_L", "mouthPress_R"],
+            "AU26": ["jawOpen"],
+            "AU28": ["mouthRollUpper", "mouthRollLower"],
+            "AU34": ["cheekPuff"],
+            "AU44": ["eyeSquint_L", "eyeSquint_R"],
+            "AU45": ["eyeBlink_L", "eyeBlink_R"]
+        }
+
+
+        // perhaps be adjusteable in the future
+        let currentStrengths = strengthsDefault;
+        let currentAuConfig = auConfigDefault;
+
+        // "Entwicklung einer Webanwendung zur Animation von
+        //  Gesichtsausdrücken mit Three.js durch Action Units nach dem FACS und ARKit Blendshapes"
+
+
+        // "Entwicklung einer Three.js Webanwendung
+        //  zur Animation von Gesichtsausdrücken"
+
+
+
+        /////////////////////
+        // initialize Layout
+        ////////////////////
+
+        makeResizableDivider('dividerLeft');
+        makeResizableDivider('dividerRight');
+        createAUSliders(auConfigDefault, strengthsDefault);
+        resizeRendererToDisplaySize();
+
+
+        function makeResizableDivider(dividerId) {
+            const divider = document.getElementById(dividerId);
+            let startX, startWidth;
+
+            function onMouseMove(e) {
+                if (!startWidth) return;
+                const dx = e.clientX - startX;
+                const newWidth = (dividerId === 'dividerLeft' ? startWidth + dx : startWidth - dx);
+                if (dividerId === 'dividerLeft') {
+                    divider.previousElementSibling.style.width = `${newWidth}px`;
+                } else {
+                    divider.nextElementSibling.style.width = `${newWidth}px`;
+                }
+                document.body.style.cursor = 'ew-resize';
+            }
+
+            function onMouseUp() {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+                document.body.style.cursor = '';
+                startWidth = undefined;
+            }
+
+            divider.addEventListener('mousedown', (e) => {
+                startX = e.clientX;
+                startWidth = (dividerId === 'dividerLeft' ? divider.previousElementSibling.offsetWidth : divider.nextElementSibling.offsetWidth);
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            });
+        }
+
+        function resizeRendererToDisplaySize() {
+            const width = canvasContainer.clientWidth;
+            const height = canvasContainer.clientHeight;
+
+            // Check if the renderer's current size is different from the new size
+            if (renderer.domElement.width !== width || renderer.domElement.height !== height) {
+                // Update  renderer and camera aspect ratio
+                renderer.setSize(width, height, false); // false to avoid CSS styling
+                const cameraAspect = width / height;
+                if (camera) {
+                    camera.aspect = cameraAspect;
+                    camera.updateProjectionMatrix();
+                }
+            }
+            centerScrollbars();
+
+        }
+
+        function centerScrollbars() {
+            const container = document.querySelector('.canvas-container');
+            const canvas = renderer.domElement;
+
+            if (canvas && container) {
+                const excessWidth = Math.max(canvas.width - container.clientWidth, 0);
+                const excessHeight = Math.max(canvas.height - container.clientHeight, 0);
+
+                container.scrollLeft = excessWidth / 2;
+                container.scrollTop = excessHeight / 2;
+            }
+        }
+
+        // initialy created from the default, should update if changed
+        createAUSliders(auConfigDefault, strengthsDefault);
+        centerScrollbars();
+
+
+        /////////////////
+        // GUI
+        ///////////////
+
+        function createGUIForModel(model) {
+            const mesh = scene.getObjectByName(meshName);
+            const gui = new GUI();
+            gui.close();
+
+            // add morphtargets
+            for (const [key, value] of Object.entries(mesh.morphTargetDictionary)) {
+                gui.add(mesh.morphTargetInfluences, value, 0, 1, 0.01)
+                    .name(key.replace('blendShape1.', ''))
+                    .listen(mesh.morphTargetInfluences);
+            }
+
+            // Add a button for toggle the wireframe
+            gui.add({
+                toggleWireframe: function () {
+                    model.material.wireframe = !model.material.wireframe;
+                }
+            }, 'toggleWireframe').name("Toggle Wireframe");
+
+            gui.addColor(backgroundColor, 'color').name('Background Color').onChange((value) => {
+                scene.background = new THREE.Color(value);
+            });
+
+            return gui;
+        }
+
+
+        ///////////////////////
+        // Animation loop
+        ////////////////////
+
+        function animate() {
+            requestAnimationFrame(() => animate());
+            const delta = clock.getDelta();
+            if (mixer) {
+                mixer.update(delta);
+            }
+            renderer.render(scene, camera);
+
+        }
+
+        ///////////////////
+        // Animation Clip
+        /////////////////
+
+        // build the clip from the global mesh name and an array of influences and timevalues
+        function createMorphAnimationClip(meshName, influences, durations) {
+
+            // Ensures the influences array and the durations array are valid
+            // meaning between two frames thers exactly one duration
+            if (!influences || !durations || influences.length !== durations.length + 1) {
+                console.error('Invalid influences or durations array.');
+                return null;
+            }
+
+            let tracks = [];
+
+            // For each morph target, create a keyframe track
+            for (let i = 0; i < 52; i++) { //  52 morph targets are immutable
+                let times = []; // Times array 
+                let values = []; // Influence values 
+
+                let currentTime = 0;
+                times.push(currentTime); // Animation starts at t=0
+                values.push(influences[0][i]); // Initial influence value
+
+                // Iterate over each influence frame except the last, to set up the keyframes
+                for (let j = 0; j < durations.length; j++) {
+                    currentTime += durations[j] / 1000; // Convert duration to seconds and add to current time
+                    times.push(currentTime); // Add the time for this keyframe
+                    values.push(influences[j + 1][i]); // Add the influence value for this keyframe
+                }
+
+                // Create a keyframe track for the current morph target
+                let trackName = meshName + '.morphTargetInfluences[' + i + ']';
+                // check for interpolation modes
+                let track = new THREE.NumberKeyframeTrack(trackName, times, values, THREE.InterpolateSmooth);
+                tracks.push(track);
+            }
+
+            // Create the animation clip
+            let animationClip = new THREE.AnimationClip('morphAnimation', -1, tracks);
+
+            console.log("Animation Clip erstellt: \n" + animationClip);
+
+            return animationClip;
+        }
+
+        // Create an AnimationAction for the clip and play it
+        function playAnimationClip(clip) {
+            console.log("here " + mixer);
+            if (!mixer || !(clip instanceof THREE.AnimationClip)) {
+                console.error('No mixer is defined or clip is not valid');
+                return;
+            }
+
+            const action = mixer.clipAction(clip);
+            if (isRepeatChecked()) {
+                action.setLoop(THREE.LoopRepeat);
+            } else {
+                action.setLoop(THREE.LoopOnce);
+            }
+
+            if (isCaptureChecked() && !isRepeatChecked()) {
+
+                recordCanvas(renderer.domElement, mixer);
+
+            }
+
+            action.play();
+
+        }
+
+
+        /////////////////////
+        // set all influences to 0 and start animation loop initially
+
+        resetFace();
+        animate();
+
+
+        ////////////////////
+        // Event Listeners
+        //////////////////
+
+        document.getElementById('playAnimationButton').addEventListener('click',startAnimation);
+
+        window.addEventListener('resize', resizeRendererToDisplaySize);
+
+        document.getElementById('resetFace').addEventListener('click', resetFace);
+
+        document.getElementById('stopAnimations').addEventListener('click', stopAllAnimations);
+
+        document.getElementById('resetAUButton').addEventListener('click', resetAUButtonsAndMesh);
+
+        document.getElementById('createAnimationButton').addEventListener('click', createAnimation);
+
+        document.getElementById('resetAUAnimations').addEventListener('click', resetAnimation);
+
+        document.getElementById('saveButton').addEventListener('click', saveAnimationToJSON);
+
+
+        document.getElementById('loadButton').addEventListener('click', function () {
+            document.getElementById('fileInput').click();
+        });
+
+        document.getElementById('fileInput').addEventListener('change', loadAnimationFromJSON);
+
+        document.getElementById('captureButton').addEventListener('click', captureKeyframeAndThumbnail);
+
+
+        /////////////////////
+        //     Utils and Callbacks 
+        /////////////////
+
+        function startAnimation() {
+            if (!animationClip) {
+                console.error('No animation clip is defined.');
+                return;
+            }
+            stopAllAnimations();
+
+            // Assuming playAnimationClip is the function that plays the given animation clip
+            playAnimationClip(animationClip);
+        }
+
+
+        function captureKeyframeAndThumbnail() {
+            let tempCanvas = document.createElement('canvas');
+            let tempCtx = tempCanvas.getContext('2d');
+
+            let cropWidth = renderer.domElement.width * 0.4;
+            let cropHeight = renderer.domElement.height * 0.6;
+            let offsetX = renderer.domElement.width * 0.3;
+            let offsetY = renderer.domElement.height * 0.2;
+
+            tempCanvas.width = cropWidth;
+            tempCanvas.height = cropHeight;
+
+            tempCtx.drawImage(renderer.domElement, offsetX, offsetY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+
+            let imageURL = tempCanvas.toDataURL('image/png');
+            let durationValue = document.getElementById('durationInput').value || '0'; // Default to 0 if no input
+            let endframe = getCurrentInfluence(); // Assume this function returns an array or a copy
+
+            let startframe;
+            if (animations.length > 0 && animations[animations.length - 1].Transitions.length > 0) {
+                let lastTransition = animations[animations.length - 1].Transitions[animations[animations.length - 1].Transitions.length - 1];
+                startframe = [...lastTransition.endframe]; // Copy of the last endframe for startframe
+            } else {
+                startframe = [...initialInfluences]; // Copy of initial influences if no previous transitions
+            }
+
+            if (animations.length === 0) {
+                animations.push({
+                    "name": "AnimationName",
+                    "Transitions": []
+                });
+            }
+
+            animations[animations.length - 1].Transitions.push({
+                "Thumbnail": imageURL,
+                "startframe": [...startframe],
+                "endframe": [...endframe],
+                "duration": durationValue
+            });
+
+            // Create and append the thumbnail
+            let img = document.createElement('img');
+            img.src = imageURL;
+            img.style.width = '100px';
+            img.style.height = 'auto';
+            img.style.margin = '5px';
+            img.style.cursor = 'pointer';
+            img.onclick = function () {
+                document.getElementById('largeImage').src = img.src;
+            };
+
+            // Create a label for the duration and append it
+            let durationLabel = document.createElement('div');
+            durationLabel.textContent = `Duration: ${durationValue}ms`;
+            durationLabel.style.margin = '5px';
+            durationLabel.style.textAlign = 'center';
+
+            // Append both the image and the duration label to the imageContainer
+            let container = document.createElement('div');
+            container.style.display = 'inline-block';
+            container.style.textAlign = 'center';
+            container.appendChild(img);
+            container.appendChild(durationLabel);
+
+            document.getElementById('imageContainer').appendChild(container);
+        }
+
+
+        function loadAnimationFromJSON() {
+            var fileReader = new FileReader();
+
+            fileReader.onload = function (event) {
+                try {
+                    animations = JSON.parse(event.target.result);
+                    console.log('Animations loaded successfully');
+
+                    // Clear existing thumbnails & preview
+                    document.getElementById('imageContainer').innerHTML = '';
+                    document.getElementById('largeImage').innerHTML = '';
+
+                    // Create and display new thumbnails from the loaded animations
+                    animations.forEach(animation => {
+                        animation.Transitions.forEach(transition => {
+                            var img = document.createElement('img');
+                            img.src = transition.Thumbnail;
+                            img.style.width = '100px';
+                            img.style.height = 'auto';
+                            img.style.margin = '5px';
+                            img.style.cursor = 'pointer';
+                            img.onclick = function () {
+                                document.getElementById('largeImage').src = img.src;
+                            };
+
+                            document.getElementById('imageContainer').appendChild(img);
+                        });
+                    });
+                } catch (e) {
+                    console.error('Error loading JSON: ', e);
+                }
+            };
+
+            // Read the selected file
+            var file = event.target.files[0];
+            if (file) {
+                fileReader.readAsText(file);
+            }
+        }
+
+
+        function saveAnimationToJSON() {
+            var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(animations));
+            var downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "animations.json");
+            document.body.appendChild(downloadAnchorNode); // Required for Firefox
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+
+        function resetAnimation() {
+            animations = [];
+            document.getElementById('imageContainer').innerHTML = '';
+
+            stopAllAnimations();
+
+            document.querySelectorAll('.slider').forEach(slider => {
+                slider.value = 0;
+            });
+
+            resetFace();
+            document.getElementById('largeImage').src = '';
+        }
+
+
+        function createAnimation() {
+            let influences = [];
+            let durations = [];
+            let animation = animations[0]; // Assuming we're dealing with the first animation for simplicity.
+
+            console.log("howdy");
+            logAnimationDetails();
+
+            // Ensure there is at least one transition to process.
+            if (animation.Transitions.length === 0) {
+                console.error("No transitions found.");
+                return;
+            }
+
+            // Initialize influences with the startframe of the first transition.
+            influences.push([...animation.Transitions[0].startframe]);
+
+            // Iterate over the transitions to populate influences and durations.
+            for (let i = 0; i < animation.Transitions.length; i++) {
+                let transition = animation.Transitions[i];
+
+                // Add the endframe of each transition to influences.
+                influences.push([...transition.endframe]);
+
+                // Add the duration of each transition to durations, except for the last one.
+                durations.push(transition.duration);
+
+            }
+
+            // Log the constructed arrays for verification.
+            console.log("influences\n" + influences.map(arr => `[${arr.join(', ')}]`).join('\n'));
+            console.log("durations\n" + durations.join(', '));
+
+            // Now call the function to create and play the animation clip.
+            animationClip = createMorphAnimationClip(meshName, influences, durations);
+        }
+
+
+        function resetAUButtonsAndMesh() {
+            document.querySelectorAll('.slider').forEach(slider => {
+                slider.value = 0;
+                slider.nextElementSibling.textContent = 'None';
+            });
+
+            resetFace();
+        }
+
+        function stopAllAnimations() {
+            if (mixer) {
+                // Gets all actions from the mixer internal mixer cache
+                const allActions = mixer._actions;
+
+                allActions.forEach((action) => {
+                    action.stop();
+                });
+
+            }
+        }
+
+
+        function resetFace() {
+            let mesh = scene.getObjectByName(meshName);
+
+            mesh.morphTargetInfluences.forEach((influence, index) => {
+                mesh.morphTargetInfluences[index] = 0;
+            });
+        }
+
+        function getCurrentInfluence() {
+
+            return scene.getObjectByName(meshName).morphTargetInfluences;
+
+        }
+
+        function logAnimationDetails() {
+            animations.forEach((animation, index) => {
+                console.log(`Animation ${index + 1}:`);
+                console.log(`Name: ${animation.name}`);
+                animation.Transitions.forEach((transition, tIndex) => {
+                    console.log(`Transition ${tIndex + 1}:`);
+                    console.log(`  Thumbnail: ${transition.Thumbnail}`);
+                    console.log(`  Start Frame: ${transition.startframe}`);
+                    console.log(`  End Frame: ${transition.endframe}`);
+                    console.log(`  Duration: ${transition.duration}`);
+                });
+                console.log('---------------------------');
+            });
+        }
+
+        function isRepeatChecked() {
+            return document.getElementById('repeatCheckbox').checked;
+        }
+
+
+        function isCaptureChecked() {
+            return document.getElementById('captureCheckbox').checked;
+        }
+
+        function recordCanvas(canvas, mixer) {
+            if (!canvas) {
+                console.error('Canvas element is not provided or found.');
+                return;
+            }
+
+            let stream = canvas.captureStream(60); // Capture at 60 frames per second
+            let recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+            let chunks = [];
+
+            recorder.ondataavailable = function (e) {
+                if (e.data.size > 0) {
+                    chunks.push(e.data);
+                }
+            };
+
+            recorder.onstop = function () {
+                let blob = new Blob(chunks, { type: 'video/webm' });
+                let url = URL.createObjectURL(blob);
+
+                let a = document.createElement('a');
+                document.body.appendChild(a);
+                a.style = 'display: none';
+                a.href = url;
+                a.download = 'threejs-animation.webm';
+                a.click();
+
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            };
+
+            recorder.start();
+
+            mixer.addEventListener('finished', (e) => {
+                recorder.stop();
+            });
+        }
+
+        function handleSliderChange(action, value) {
+
+            let mesh = scene.getObjectByName(meshName);
+            let change = currentAuConfig[action];
+            change.forEach(x => mesh.morphTargetInfluences[mesh.morphTargetDictionary[x]] = (value / 5));
+            console.log("value changed to: " + value / 5);
+
+        }
+
+        // Update morphTargetInfluences based on slider values and the auConfig
+        function updateMorphTargetInfluences(auConfig, strengths) {
+            // Iterate over the AU configuration
+            let head = scene.getObjectByName(meshName);
+            Object.keys(auConfig).forEach(au => {
+                // For each AU, find the associated morph targets
+                auConfig[au].forEach(targetName => {
+                    const morphIndex = head.morphTargetDictionary[targetName];
+                    if (morphIndex !== undefined) {
+                        // Get the slider value for the current AU
+                        // Assuming the AU's name matches a class or id in the slider's HTML
+                        const slider = document.querySelector(`.slider[data-au='${au}']`);
+                        console.log(slider);
+                        if (slider) {
+                            // Map the slider value (1-5) to the strength ('A'-'E')
+                            const strengthKey = ['A', 'B', 'C', 'D', 'E'][slider.value - 1];
+                            // Update the morphTargetInfluences with the corresponding strength value
+                            head.morphTargetInfluences[morphIndex] = strengths[strengthKey];
+                            console.log("here");
+                        }
+                    }
+                });
+            });
+            console.log("new influences\n" + head.morphTargetInfluences);
+            renderer.render(scene, camera);
+        }
+
+
+
+// TODO 
+// load thumbnails from animation.Transition[n] for all n
+// save no thumbnails
+// make durations and thubnail mutable
+
+
+
+    </script>
+</body>
+
+</html>

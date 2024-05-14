@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "./three.js/build/three.module.js",
+                "three/addons/": "./three.js/examples/jsm/"
+            }
+        }
+        </script>
+        <script src="./bundle.js" type="module"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="left-column">            
+            <br>
+            <button id="saveAUConfigButton">Save AU Config</button>           
+            <button id="loadAUConfigButton">Load AU Config</button>             
+            <br>
+            <br>
+            <br>
+            <label for="codeFACSTextfield">FACS Code:</label>  
+            <br>
+            <input type="text" id="codeFACSTextfield" readonly>
+            <br>
+            <br>          
+            <button id="createNewAUButton">Create New AU</button>
+            <br>
+            <button id="resetAUButton">Reset AUs</button>            
+            <div class="actionUnitsSlidersContainer"></div>
+            <hr>
+            <div class="expressionSlidersContainer"></div>
+        </div>
+        <div class="divider" id="dividerLeft"></div>
+        <div class="middle-column">
+            <div class="canvasContainer"></div>
+        </div>
+        <div class="divider" id="dividerRight"></div>
+        <div class="right-column">
+            <button id="toggleGUIButton">Toogle Blendshapes</button>
+            <br>            
+            <br>
+            <br>
+            <input type="file" id="fileInput" style="display: none;" accept=".json">
+            <br>
+            <br>
+            <button id="saveImageButton">Save Image</button>
+            <br>
+            <button id="stopAnimationsButton">Stop Animation</button>
+            <button id="playAnimationButton">Play Animation</button>
+            <label for="repeatCheckbox">Repeat</label>
+            <input type="checkbox" id="repeatCheckbox" name="repeatCheckbox">
+            <br>
+            <label for="captureCheckbox">Capture Animation:</label>
+            <input type="checkbox" id="captureCheckbox" name="capture">
+            <br>
+            <label for="clampAtEndCheckbox">Clamp at end:</label>
+            <input type="checkbox" id="clampAtEndCheckbox" name="clampAtEnd">
+            <hr>            
+            <button id="resetFaceButton">Reset Face</button>
+            <br>
+            <label for="durationInput">Duration (millisec):</label>            
+            <input type="number" id="durationInput" name="duration" min="0" step="100" value="500">
+            <br>
+            <br>          
+            <button id="captureISIButton">Capture ISI</button>
+            <button id="captureFrameButton">Capture Frame</button>
+            <br>
+            <br>
+            <button id="resetAUKeyframesButton">Reset Keyframes</button>
+            <hr>
+            <div id="thumbnailContainer"></div>
+        </div>
+    </div>
+    <div id="addNewWindow" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h2>Add Action Unit</h2>
+            <label for="actionUnitPrefix">Action Unit Prefix:</label>
+            <input type="text" id="actionUnitPrefix" name="actionUnitPrefix">
+            <br>
+            <br>
+            <label for="actionUnitName">Action Unit Number:</label>
+            <input type="text" id="actionUnitName" name="actionUnitName">
+            <br>
+            <br>
+            <label for="actionUnitDesription">Action Unit Description:</label>
+            <input type="text" id="actionUnitDescription" name="actionUnitDescription" maxlength="20">
+            <br>
+            <br>
+            <label for="blendshapeSelect">Select Blendshapes:</label>
+            <select multiple id="blendshapeSelect"></select>
+            <br>
+            <br>
+            <button id="confirmActionUnitButton">Confirm Action Unit</button>
+            <h2>Add Expression</h2>
+            <label for="expressionName">Expression Name:</label>
+            <input type="text" id="expressionName" name="expresssionName">
+            <br>
+            <br>
+            <label for="actionUnitSelect">Select Action Units:</label>
+            <select multiple id="actionUnitSelect"></select>
+            <br>
+            <br>
+            <button id="confirmExpressionButton">Confirm Expression</button>
+        </div>
+    </div>
+    </div>
+</body>
+</html>
+
+
+
+
+

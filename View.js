@@ -253,7 +253,6 @@ function updateThumbnailContainer() {
         container.appendChild(removeButton);
         parentContainer.appendChild(container);
     })
-
 }
 
 function getCurrentCanvasCropped() {

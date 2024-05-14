@@ -1,0 +1,543 @@
+{
+    "actionUnits": [
+        {
+            "prefix": "AU",
+            "number": "1",
+            "description": "Inner Brow Raiser",
+            "blendshapes": [
+                {
+                    "browInnerUp": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "prefix": "AU",
+            "number": "2",
+            "description": "Outer Brow Raiser",
+            "blendshapes": [
+                {
+                    "browOuterUp_L": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                },
+                {
+                    "browOuterUp_R": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "prefix": "AU",
+            "number": "4",
+            "description": "Brow Lowerer",
+            "blendshapes": [
+                {
+                    "browDown_L": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                },
+                {
+                    "browDown_R": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "prefix": "AU",
+            "number": "5",
+            "description": "Upper Lid Raiser",
+            "blendshapes": [
+                {
+                    "eyeWide_L": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                },
+                {
+                    "eyeWide_R": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "prefix": "AU",
+            "number": "6",
+            "description": "Cheek Raiser and Lid Compressor",
+            "blendshapes": [
+                {
+                    "cheekSquint_L": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                },
+                {
+                    "cheekSquint_R": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "prefix": "AU",
+            "number": "7",
+            "description": "Lid Tightener",
+            "blendshapes": [
+                {
+                    "eyeSquint_L": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                },
+                {
+                    "eyeSquint_R": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "prefix": "AU",
+            "number": "9",
+            "description": "Nose Wrinkler",
+            "blendshapes": [
+                {
+                    "noseSneer_L": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                },
+                {
+                    "noseSneer_R": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "prefix": "AU",
+            "number": "10",
+            "description": "Upper Lip Raiser",
+            "blendshapes": [
+                {
+                    "mouthUpperUp_L": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                },
+                {
+                    "mouthUpperUp_R": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "prefix": "AU",
+            "number": "12",
+            "description": "Lip Corner Puller",
+            "blendshapes": [
+                {
+                    "mouthSmile_L": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                },
+                {
+                    "mouthSmile_R": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "prefix": "AU",
+            "number": "14",
+            "description": "Dimpler",
+            "blendshapes": [
+                {
+                    "mouthDimple_L": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                },
+                {
+                    "mouthDimple_R": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "prefix": "AU",
+            "number": "15",
+            "description": "Lip Corner Depressor",
+            "blendshapes": [
+                {
+                    "mouthFrown_L": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                },
+                {
+                    "mouthFrown_R": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "prefix": "AU",
+            "number": "16",
+            "description": "Lower Lip Depressor",
+            "blendshapes": [
+                {
+                    "mouthLowerDown_L": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                },
+                {
+                    "mouthLowerDown_R": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "prefix": "AU",
+            "number": "17",
+            "description": "Chin Raiser",
+            "blendshapes": [
+                {
+                    "mouthShrugUpper": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                },
+                {
+                    "mouthShrugLower": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "prefix": "AU",
+            "number": "18",
+            "description": "Lip Pucker",
+            "blendshapes": [
+                {
+                    "mouthPucker": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "prefix": "AU",
+            "number": "20",
+            "description": "Lip Stretcher",
+            "blendshapes": [
+                {
+                    "mouthStretch_L": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                },
+                {
+                    "mouthStretch_R": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "prefix": "AU",
+            "number": "22",
+            "description": "Lip Funneler",
+            "blendshapes": [
+                {
+                    "mouthFunnel": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "prefix": "AU",
+            "number": "24",
+            "description": "Lip Presser",
+            "blendshapes": [
+                {
+                    "mouthPress_L": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                },
+                {
+                    "mouthPress_R": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "prefix": "AU",
+            "number": "26",
+            "description": "Jaw Drop",
+            "blendshapes": [
+                {
+                    "jawOpen": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "prefix": "AU",
+            "number": "28",
+            "description": "Lips Suck",
+            "blendshapes": [
+                {
+                    "mouthRollUpper": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                },
+                {
+                    "mouthRollLower": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "prefix": "AD",
+            "number": "34",
+            "description": "Puff",
+            "blendshapes": [
+                {
+                    "cheekPuff": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "prefix": "AU",
+            "number": "45",
+            "description": "Blink - Optional",
+            "blendshapes": [
+                {
+                    "eyeBlink_L": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                },
+                {
+                    "eyeBlink_R": [
+                        0.2,
+                        0.4,
+                        0.6,
+                        0.8,
+                        1
+                    ]
+                }
+            ]
+        }
+    ],
+    "expressions": [
+        {
+            "identifier": "Surprise",
+            "actionUnits": [
+                "AU1",
+                "AU2",
+                "AU5",
+                "AU26"
+            ]
+        },
+        {
+            "identifier": "Fear",
+            "actionUnits": [
+                "AU1",
+                "AU2",
+                "AU4",
+                "AU5",
+                "AU7",
+                "AU20",
+                "AU26"
+            ]
+        },
+        {
+            "identifier": "Disgust",
+            "actionUnits": [
+                "AU2",
+                "AU9",
+                "AU15",
+                "AU16"
+            ]
+        },
+        {
+            "identifier": "Anger",
+            "actionUnits": [
+                "AU4",
+                "AU5",
+                "AU7",
+                "AU23"
+            ]
+        },
+        {
+            "identifier": "Happiness",
+            "actionUnits": [
+                "AU1",
+                "AU6",
+                "AU12",
+                "AU14"
+            ]
+        },
+        {
+            "identifier": "Sadness",
+            "actionUnits": [
+                "AU1",
+                "AU4",
+                "AU15",
+                "AU23"
+            ]
+        }
+    ]
+}

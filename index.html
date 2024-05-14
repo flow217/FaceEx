@@ -1,30 +1,3 @@
-<!-- 
-
-FaceEx - A application for morphing a facemesh to express Action Units and based on them Emotions
-
-
-MIT License
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
--->
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -40,88 +13,110 @@ SOFTWARE.
                 "three/addons/": "./three.js/examples/jsm/"
             }
         }
-        </script>   
+        </script>
+        <script src="View.js" type="module"></script>
 </head>
 
 <body>
-
-    <script src="FaceEx.js" type="module"></script>
-
     <div class="container">
-        <div class="left-column">
-            <input type="text" id="sliderPositions" readonly>
+        <div class="left-column">            
             <br>
-            <button id="resetAUButton">Reset AUs</button>
+            <button id="saveAUConfigButton">Save AU Config</button>           
+            <button id="loadAUConfigButton">Load AU Config</button>             
             <br>
-            <button id="saveAUConfig">Save AU Config</button>
             <br>
-            <button id="loadAUConfig">Load AU Config</button>
             <br>
-            <button id="createNewActionUnitButton">Create New AU</button>
+            <label for="codeFACSTextfield">FACS Code:</label>  
             <br>
-            <div class="au-sliders-container"></div>
+            <input type="text" id="codeFACSTextfield" readonly>
+            <br>
+            <br>          
+            <button id="createNewAUButton">Create New AU</button>
+            <br>
+            <button id="resetAUButton">Reset AUs</button>            
+            <div class="actionUnitsSlidersContainer"></div>
             <hr>
-            <div class="combined-sliders-container"></div>
+            <div class="expressionSlidersContainer"></div>
         </div>
         <div class="divider" id="dividerLeft"></div>
         <div class="middle-column">
-            <div class="canvas-container"></div>
+            <div class="canvasContainer"></div>
         </div>
         <div class="divider" id="dividerRight"></div>
         <div class="right-column">
-            <br>
             <button id="toggleGUIButton">Toogle Blendshapes</button>
-            <br>
+            <br>            
             <br>
             <br>
             <input type="file" id="fileInput" style="display: none;" accept=".json">
             <br>
             <br>
-            <button id="saveImage">Save Image</button>
+            <button id="saveImageButton">Save Image</button>
             <br>
-            <button id="stopAnimations">Stop Animation</button>
-            <button id="createAnimationButton">Create Animation</button>
+            <button id="stopAnimationsButton">Stop Animation</button>
             <button id="playAnimationButton">Play Animation</button>
             <label for="repeatCheckbox">Repeat</label>
             <input type="checkbox" id="repeatCheckbox" name="repeatCheckbox">
             <br>
             <label for="captureCheckbox">Capture Animation:</label>
             <input type="checkbox" id="captureCheckbox" name="capture">
-            <hr>
-            <button id="resetAUAnimations">Reset AU Animations</button>
             <br>
-            <label for="durationInput">Duration (millisec):</label>
-            <input type="number" id="durationInput" name="duration" min="0" step="50" value="500">
-            <button id="captureButton">Capture Frame</button>
-            <button id="resetFace">Reset Face</button>
-            <div id="imageContainer" style="width: 100%;"></div>
+            <label for="clampAtEndCheckbox">Clamp at end:</label>
+            <input type="checkbox" id="clampAtEndCheckbox" name="clampAtEnd">
+            <hr>            
+            <button id="resetFaceButton">Reset Face</button>
+            <br>
+            <label for="durationInput">Duration (millisec):</label>            
+            <input type="number" id="durationInput" name="duration" min="0" step="100" value="500">
+            <br>
+            <br>          
+            <button id="captureISIButton">Capture ISI</button>
+            <button id="captureFrameButton">Capture Frame</button>
+            <br>
+            <br>
+            <button id="resetAUKeyframesButton">Reset Keyframes</button>
             <hr>
-            <img id="largeImage" src="" style="width: 90%; display: block; margin: 20px auto;" />
-
+            <div id="thumbnailContainer"></div>
         </div>
-
-        <!-- Modal for accessing configuration-->
-        <div id="myModal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2>Add Action Unit</h2>
-                <label for="actionUnitName">Action Unit Name:</label>
-                <input type="text" id="actionUnitName" name="actionUnitName"><br><br>
-                <label for="blendshapeSelect">Select Blendshapes:</label>
-                <select multiple id="blendshapeSelect"></select>
-                <br>
-                <br>
-                <button id="confirmActionUnit">Confirm Action Unit</button>
-                <h2>Add Combined Action Unit</h2>
-                <label for="combinedActionUnitName">Combined Action Unit Name:</label>
-                <input type="text" id="combinedActionUnitName" name="combinedActionUnitName"><br><br>
-                <label for="actionUnitSelect">Select Action Units:</label>
-                <select multiple id="actionUnitSelect"></select>
-                <br>
-                <br>
-                <button id="confirmCombinedActionUnit">Confirm Combined Action Unit</button>
-            </div>
+    </div>
+    <div id="addNewWindow" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h2>Add Action Unit</h2>
+            <label for="actionUnitPrefix">Action Unit Prefix:</label>
+            <input type="text" id="actionUnitPrefix" name="actionUnitPrefix">
+            <br>
+            <br>
+            <label for="actionUnitName">Action Unit Number:</label>
+            <input type="text" id="actionUnitName" name="actionUnitName">
+            <br>
+            <br>
+            <label for="actionUnitDesription">Action Unit Description:</label>
+            <input type="text" id="actionUnitDescription" name="actionUnitDescription" maxlength="20">
+            <br>
+            <br>
+            <label for="blendshapeSelect">Select Blendshapes:</label>
+            <select multiple id="blendshapeSelect"></select>
+            <br>
+            <br>
+            <button id="confirmActionUnitButton">Confirm Action Unit</button>
+            <h2>Add Expression</h2>
+            <label for="expressionName">Expression Name:</label>
+            <input type="text" id="expressionName" name="expresssionName">
+            <br>
+            <br>
+            <label for="actionUnitSelect">Select Action Units:</label>
+            <select multiple id="actionUnitSelect"></select>
+            <br>
+            <br>
+            <button id="confirmExpressionButton">Confirm Expression</button>
         </div>
+    </div>
     </div>
 </body>
 </html>
+
+
+
+
+

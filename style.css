@@ -1,11 +1,15 @@
 body {
-    background-color: #888888;
+    background-color: #827c7c;
 }
 
 .container {
     display: flex;
     width: 100%;
     height: 100vh;
+}
+
+#resetAUButton{
+    width: 100%;
 }
 
 .left-column,
@@ -17,7 +21,6 @@ body {
 }
 
 .left-column {
-    min-width: 300px;    
     display: inline;
 }
 
@@ -34,7 +37,7 @@ body {
     flex-grow: 1;
 }
 
-.canvas-container {
+.canvasContainer {
     width: 100%;
     height: 100%;
     overflow: auto;
@@ -55,20 +58,15 @@ button {
     display: block;
 }
 
-.thumbnail-container {
+.thumbnailContainer {
     display: inline-block;
     text-align: center;
     margin: 5px;
+    overflow: auto;
 }
 
 .duration-label {
     display: block;
-}
-
-
-#imageContainer {
-    max-height: 500px;
-    overflow-y: auto;
 }
 
 .label.button {
@@ -98,39 +96,36 @@ button {
 
 .modal-content {
     position: fixed;
-    top: 50%;  
-    left: 50%;   
-    transform: translate(-50%, -50%);   
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     background-color: #f4f4f4;
     padding: 20px;
-    box-sizing: border-box;    
-    overflow: auto;   
-    max-height: 90%;   
-    width: auto;   
-    max-width: 90%;  
+    box-sizing: border-box;
+    overflow: auto;
+    max-height: 90%;
+    width: auto;
+    max-width: 90%;
 }
 
-.combined-action-unit label,
-.combined-action-unit input[type="range"],
-.combined-action-unit span {
-    width: 100%; 
-    display: block; 
-    margin-bottom: 5px;
+#imageContainer {
+    display: flex;  
+    flex-direction: column;   
 }
 
 select {
-    width: 100%;  
-    padding: 5px; 
-    height: auto;   
+    width: 100%;
+    padding: 5px;
+    height: auto;
     background-color: #fff;
-    border: 1px solid #ccc; 
-    box-sizing: border-box;   
-    margin-bottom: 10px;  
-    overflow: auto;  
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    overflow: auto;
 }
 
 select[multiple] {
-    height: auto; 
+    height: auto;
     cursor: pointer;
 }
 
@@ -140,9 +135,19 @@ select[multiple] {
     font-size: 28px;
     font-weight: bold;
 }
+
 .close:hover,
 .close:focus {
     color: black;
     text-decoration: none;
     cursor: pointer;
+}
+
+.adjustmentDiv {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    margin-top: 10px;
+    background: #f0f0f0;
+    border: 1px solid #ccc;
 }

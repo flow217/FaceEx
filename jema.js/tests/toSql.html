@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Experiments</title>
+    <meta name="viewport" content="width=device-width" />
+<body>
+
+
+<script type=module>
+
+import {toCreateTable} from '../tools/toSQL.js';
+import {dump} from 'https://cdn.jsdelivr.net/gh/nuxodin/dump.js@1.2.2/mod.min.js';
+
+
+const schema = {
+    "type": "object",
+    "properties": {
+        "user": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "title": "User ID",
+                    "minimum": 0,
+                    "maximum": 1000000000,
+                    "x_primary": true,
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "contentEncoding": "8bit",
+                },
+                "email": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                },
+            },
+        },
+        "post": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "x_primary": true,
+                    "x_autoincrement": true,
+                },
+                "user_id": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000000000,
+                    "x_foreign": {
+                        "table": "use",
+                        "column": "id",
+                    },
+                },
+                "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300,
+                },
+                "body": {
+                    "type": "string",
+                    "maxLength": 10000,
+                },
+            },
+        },
+    }
+};
+
+
+jsonOut.innerHTML = dump(schema);
+sqlOut.innerHTML = toCreateTable(schema);
+
+</script>
+
+
+<div id="jsonOut"></div>
+<pre id="sqlOut"></pre>

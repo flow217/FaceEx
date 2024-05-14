@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Tests</title>
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mocha/mocha.min.css" />
+
+<body>
+
+<div id="mocha"></div>
+
+<script src="https://unpkg.com/chai@4.4.1/chai.js"></script>
+<script src="https://unpkg.com/mocha@10.2.0/mocha.js"></script>
+
+<script class="mocha-init">
+    mocha.setup('bdd');
+    mocha.checkLeaks();
+</script>
+
+<script type=module>
+import {Schema} from '../schema.js';
+
+import {tests} from './test-suite-init.js';
+
+for (const [file, data] of Object.entries(tests)) {
+
+    for (const test of data) {
+        const original = structuredClone(test.schema);
+
+        const schema = new Schema(test.schema);
+
+        try {
+            await schema.deref();
+        } catch (e) {
+            console.log('deref error ', file,  '------------------------');
+            console.log('file ', file);
+            console.log('test ', test.description);
+            console.dir('error', e);
+            console.log('schema original', original);
+            console.log('schema computed', schema.schema);
+        }
+
+        describe(test.description, () => {
+            for (const subtest of test.tests) {
+                it(subtest.description, () => {
+
+                    console.log('------------------------', file, '------------------------');
+                    console.log(subtest.description);
+
+                    const errors = [];
+                    for (const error of schema.errors(subtest.data)) {
+                        errors.push({
+                            message: error,
+                            schemaPath: schema.schemaStack.join("/"),
+                            dataPath: schema.dataStack.join("/"),
+                        });
+                    }
+
+
+                    //const errors = [...schema.errors(subtest.data)];
+                    const result = errors.length === 0;
+
+                    if (result !== subtest.valid) {
+                        console.log('------------------------error------------------------');
+                        console.log(subtest.description);
+                        console.log('data:', subtest.data);
+                        console.log('schema original:', original);
+                        console.log('schema computed:', schema.schema);
+                        console.log('expected:', subtest.valid);
+                        console.log('errors', errors);
+                    }
+                    chai.expect( result ).to.be.equal(subtest.valid);
+                });
+            }
+        });
+    }
+}
+
+mocha.run();
+
+</script>
+<script class="mocha-exec" type=module>
+    //mocha.run();
+</script>
